@@ -1,0 +1,50 @@
+Step-01: Input Variables Basics
+
+Create / Review the terraform manifests
+
+c1-versions.tf
+c2-variables.tf
+c3-security-groups.tf
+c4-ec2-instance.tf
+
+
+**************************************************************************************************************************
+apache-install.sh
+
+#!/bin/bash
+sudo yum update -y
+sudo yum install httpd -y
+sudo systemctl enable httpd
+sudo systemctl start httpd
+echo "<html><body><div>Welcome to Infinito ! AWS Infra created using Terraform</div></body></html>" > /var/www/html/index.html
+
+**************************************************************************************************************************
+We are going to define c3-variables.tf and define the below listed variables
+
+	aws_region is a variable of type string
+	ec2_ami_id is a variable of type string
+	ec2_instance_count is a variable of type number
+
+**************************************************************************************************************************
+# Initialize Terraform
+terraform init
+
+# Validate Terraform configuration files
+terraform validate
+
+# Format Terraform configuration files
+terraform fmt
+
+# Review the terraform plan
+terraform plan
+
+# Create Resources
+terraform apply
+
+# Access Application
+http://<Public-IP-Address>
+
+# Clean-Up
+terraform destroy -auto-approve
+rm -rf .terraform*
+rm -rf terraform.tfstate*

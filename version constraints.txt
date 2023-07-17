@@ -1,0 +1,130 @@
+Play with Terraform Block Version
+
+Lab 1
+
+terraform {
+  required_version = "~> 0.15.3"
+}
+
+Apply,
+terraform init
+
+Allows right most version component to increment
+Example: ~> 0.15.3 [ Allow 0.15.4 & 0.15.99 not 0.16.0]
+
+************************************************************************************************************************
+Lab 2
+
+terraform {
+  required_version = " = 0.15.3"
+}
+
+Apply,
+terraform init
+
+Allow exact version of 0.15.3
+
+*************************************************************************************************************************
+Lab 3
+
+terraform {
+  required_version = ">= 0.14.2, <= 0.15.7"
+}
+
+Apply,
+terraform init
+
+Comparision against specfic version
+
+***********************************************************************************************************************
+Lab 4
+
+terraform {
+  required_version = "!= 0.14.9" 
+}
+
+Apply,
+terraform init
+
+Exclude exact versions
+*********************************************************************************************************************
+Required Providers Version Operators
+
+Do visit https://registry.terraform.io/browse/providers 
+
+Get to know latest version of the providers
+
+For Example, if AWS version is 3.42 below configuration file works without any error
+
+Lab 5
+
+terraform {
+    required_version = "~> 0.15.3"
+    required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+     }
+    }
+   }
+
+Apply
+terraform init
+***********************************************************************************************************************
+
+Provider version = 3.42
+
+Lab 6
+
+terraform {
+    required_version = "~> 0.15.3"
+    required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 3.0.0, < 3.1.0"
+     }
+    }
+   }
+Apply,
+terraform init
+
+You get an error. 
+
+Error: Failed to query available provider packages
+
+Could not retrieve the list of available versions for provider hashicorp/aws: locked provider registry.terraform.io/hashicorp/aws 3.42.0 does not match configured version constraint >= 3.0.0, < 3.1.0; must use terraform init -upgrade to allow selection of new versions
+
+Apply,
+terraform init -upgrade
+
+*************************************************************************************************************************
+Lab 7
+
+terraform {
+    required_version = "~> 0.15.3"
+    required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 3.0.0, <= 3.1.0"
+     }
+    }
+   }
+Apply,
+terraform init
+
+************************************************************************************************************************
+Lab 8
+
+terraform {
+    required_version = "~> 0.15.3"
+    required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0" 
+     }
+    }
+   }
+Apply,
+terraform init
+
+************************************************************************************************************************

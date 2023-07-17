@@ -1,0 +1,358 @@
+1	Create an AWS instance
+
+Resource is an object which you want to manage at cloud.
+Need to consider two importants things in order to learn resource
+1	What is type of resources
+2	Custom name you are giving to terraform (Terraform name)
+
+terraform {
+    required_version = "~> 0.15.3" //  Value mention as per your terraform version
+    required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"  // Value mention as per your aws version
+     }
+    }
+   }
+
+provider "aws" {
+	region = "us-east-1"
+	
+}
+
+resource "aws_instance" "Raminfra" {
+	ami = "ami-0df6cfabfbe4385b7" // Refer aws and get correct ami id
+	instance_type = "t2.micro"
+}
+
+Command for execution
+
+terraform init
+terraform fmt
+terraform validate
+
+terraform plan
+(Dummy execution w/o creating actual value and validate whether syntex is correct or not)
+Draft mode
+
+terraform apply
+(Actual executions and you get desired result)
+
+Do visit AWS EC2 Instance Dashboard and ensure that instance has created or not
+____________________________________________________________________________________________________________________
+
+2	Version Constraints
+
+Play with version constraints with operator value
+
+Lab 1
+
+terraform {
+  required_version = "~> 0.15"
+}
+
+Apply,
+terraform init
+
+Allows right most version component to increment
+Example: ~> 0.15.3 [ Allow 0.15.4 & 0.15.99 not 0.16.0]
+
+********************************************************************************
+
+Lab 2
+
+terraform {
+  required_version = " = 0.15.3"
+}
+
+Apply,
+terraform init
+
+Allow exact version of 0.15.3
+********************************************************************************
+
+Lab 3
+
+terraform {
+  required_version = ">= 0.14.2, <= 0.15.7"
+}
+
+Apply,
+terraform init
+
+Comparision against specfic version
+********************************************************************************
+Lab 4
+
+terraform {
+  required_version = "!= 0.14.9" 
+}
+
+Apply,
+terraform init
+
+Exclude exact versions
+********************************************************************************
+
+Required Providers Version Operators
+
+Do visit https://registry.terraform.io/browse/providers 
+
+Get to know latest version of the providers
+
+For Example, if AWS version is 3.42 below configuration file works without any error
+
+Lab 5
+
+terraform {
+    required_version = "~> 0.15.3"
+    required_providers {
+    aws = {
+      source  = "hashicorp/aws"  // hashicorp/terraform-provider-aws
+      version = "~> 3.0"
+     }
+    }
+   }
+
+Apply
+terraform init
+********************************************************************************
+terraform init -upgrade
+
+Provider version = 3.42
+
+Lab 6
+
+terraform {
+    required_version = "~> 0.15.3"
+    required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 3.0.0, < 3.1.0"
+     }
+    }
+   }
+Apply,
+terraform init
+
+You get an error. 
+
+Error: Failed to query available provider packages
+
+Could not retrieve the list of available versions for provider hashicorp/aws: locked provider registry.terraform.io/hashicorp/aws 3.42.0 does not match configured version constraint >= 3.0.0, < 3.1.0; must use terraform init -upgrade to allow selection of new versions
+
+Apply,
+terraform init -upgrade
+********************************************************************************
+Lab 7
+
+terraform {
+    required_version = "~> 0.15.3"
+    required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 3.0.0, <= 3.1.0"
+     }
+    }
+   }
+Apply,
+terraform init
+********************************************************************************
+Lab 8
+
+terraform {
+    required_version = "~> 0.15.3"
+    required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0" 
+     }
+    }
+   }
+Apply,
+terraform init
+____________________________________________________________________________________________________________________
+3	Create ec2 instance with tag
+Adding Tags at ECw Instance
+
+provider "aws" {
+	region = "us-east-1"
+	}
+
+resource "aws_instance" "Raminfra" {
+	ami = "ami-0df6cfabfbe4385b7"
+	instance_type = "t2.micro"
+	tags = {
+        	Name = "Terraform-Server"
+ 	}
+}
+
+Execute
+terraform plan
+terraform apply -auto-approve 
+(Auto Approve, eliminate your review)
+
+Terminate an AWS Instance
+
+Command is
+
+terraform destroy
+
+Do visit AWS EC2 Instance Dashboard where instance got deleted by Terraform managed instance
+____________________________________________________________________________________________________________________
+4	Create more ec2 instance with dynamic tag creation
+Create Multiple AWS Instance
+
+provider "aws" {
+	region = "us-east-1"
+		}
+
+resource "aws_instance" "DigiCloudInfra" {
+	ami = "ami-0df6cfabfbe4385b7"
+	count = 3
+	instance_type = "t2.micro"
+	tags = {
+	       Name = "DigiCloudInfra-${count.index}"
+	}
+}
+
+terraform init
+terraform plan
+terraform apply
+
+Experience with mutiple instances
+Output is
+DigiCloudInfra-0
+DigiCloudInfra-1
+DigiCloudInfra-2
+____________________________________________________________________________________________________________________
+5	Destroy specific instance
+
+resource_type - Type of the resource being addressed
+
+How to obtain resource_type? Apply below commands
+
+terraform state list
+(listing out all resources) 
+
+terraform destroy -target <RESOURCE_TYPE.NAME>
+___________________________________________________________________________________________________________________
+6	Destroy group of instance
+
+Delete group of AWS Instance
+
+terraform destroy -target <RESOURCE_TYPE.NAME> -target <RESOURCE_TYPE2.NAME>
+___________________________________________________________________________________________________________________
+
+7	Create S3 Bucket
+Create AWS S3 Buckets 
+
+S3: Simple Storage Services (Used for store files, store for backup, etc ...)
+Provide high durability (99.999999999%). Very remote change to lost data
+S3 standard is desinged for 99.99% availability
+
+provider "aws" {
+	region = "us-east-1"
+		}
+
+resource "aws_s3_bucket" "big-basket" {
+	bucket = "my-big-basket"
+}
+
+Apply,
+terraform init
+terraform plan
+terraform apply
+
+Do visit AWS S3 Bucket, where you get bucket which generated by Terraform
+___________________________________________________________________________________________________________________
+8	Create VPC
+
+provider "aws" {
+	region = "us-east-1"
+		}
+resource "aws_vpc" "vpc-dev" {
+  cidr_block = "10.0.0.0/16"
+
+  tags = {
+    "name" = "my-vpc-dev"
+  }
+}
+
+Apply,
+terraform init
+terraform plan
+terraform apply
+
+Do visit AWS VPC, ensure that VPC has created or not
+___________________________________________________________________________________________________________________
+
+9	Multiple provider configurations
+
+Understand and Implement Multiple Provider Configurations
+How to define multiple provider configuration of same Provider?
+
+Understand about default provider
+Understand and define multiple provider configurations of same provider
+
+# Provider-1 for us-east-1 (Default Provider)
+provider "aws" {
+  region = "us-east-1"
+  profile = "default" // Option to have which refer access, secret key and region
+}
+
+# Provider-2 for us-west-1
+provider "aws" {
+  region = "us-west-1"
+  profile = "default"
+  alias = "aws-west-1"
+}
+
+How to reference the non-default provider configuration in a resource?
+
+# Resource Block to Create VPC in us-west-1
+resource "aws_vpc" "vpc-us-west-1" {
+  cidr_block = "10.2.0.0/16"
+  #<PROVIDER NAME>.<ALIAS>
+  provider = aws.aws-west-1
+  tags = {
+    "Name" = "vpc-us-west-1"
+  }
+}
+
+Execute Terraform Commands
+
+# Initialize Terraform
+terraform init
+
+# Validate Terraform Configuration Files
+terraform validate
+
+# Generate Terraform Plan
+terraform plan
+
+# Create Resources
+terraform apply -auto-approve
+
+# Verify the same
+1. Verify the VPC created in us-east-1
+2. Verify the VPC created in us-west-2
+
+Step-05: Clean-Up
+
+# Destroy Terraform Resources
+terraform destroy -auto-approve
+___________________________________________________________________________________________________________________
+10	Terraform Resource Meta-Argument lifecycle
+	Refer document of Meta-Argument lifecycle.txt
+11	Variables
+	11.1	Input variables
+			Refer document of Input Variables Basics.txt
+	11.2	Input variables Assign when prompt
+			Refer document of Input Variables Assign When Prompted.txt
+	11.3	Input variables override using CLI
+			Refer document of Input Variables Override default value with cli argument -var.txt
+12	Terraform Remote state
+	Refer Terraform Remote State Storage & Locking.txt
+	Refer Code directory
+13	Terraform Cloud
